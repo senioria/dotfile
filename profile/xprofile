@@ -1,3 +1,5 @@
+export PATH="${PATH}:$(realpath ~/.local/bin/)"
+
 export TERMINAL=kitty
 export EDITOR=gvim
 
