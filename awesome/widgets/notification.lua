@@ -137,14 +137,14 @@ local function mk_notification_item(noti)
                 image = noti.icon,
                 resize = true,
                 auto_dpi = true,
+                forced_width = awful.screen.focused().workarea.width * 0.05,
+                forced_height = awful.screen.focused().workarea.height * 0.05,
                 widget = wibox.widget.imagebox,
             },
             {
                 markup = (noti.title and "<b>" .. noti.title .. "</b>\n" or "") .. (noti.text or ""),
                 widget = wibox.widget.textbox,
             },
-            forced_width = awful.screen.focused().workarea.width * 0.05,
-            forced_height = awful.screen.focused().workarea.height * 0.05,
             layout = wibox.layout.fixed.horizontal,
         }
     else

@@ -18,9 +18,9 @@ local function worker(args)
     local icon_dir = args.icon_dir or ""
 
     touchpad_widget.enabled = true
-    spawn.easy_async("xinput", function(out)
-        out:gsub("Touchpad%s+id=(%d+)", function (id)
-            touchpad_id = tonumber(id) or nil
+    spawn.easy_async_with_shell("xinput list-props $(xinput list --id-only)", function(out)
+        out:gsub("Device%s-'([^']-Touchpad[^']-)':", function (id)
+            touchpad_id = id
         end)
     end)
 
@@ -37,9 +37,13 @@ local function worker(args)
     }
 
     function touchpad_widget:toggle()
-        spawn.easy_async("xinput " .. (self.enabled and "disable " or "enable ") .. touchpad_id, function()
+        if not touchpad_id then
+            notify_msg("Touchpad not found")
+            return
+        end
+        spawn.easy_async({ "xinput", self.enabled and "disable" or "enable", touchpad_id }, function()
             self.widget:set_visible(self.enabled)
-            notify_msg("Touchpad " .. (self.enabled and "disabled" or "enabled"))
+            notify_msg(("Touchpad(%s) %s"):format(touchpad_id, self.enabled and "disabled" or "enabled"))
             self.enabled = not self.enabled
         end)
     end
