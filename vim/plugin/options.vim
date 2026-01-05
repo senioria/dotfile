@@ -133,6 +133,8 @@ autocmd User BeforeCocNvimInit {
 }
 " LSP actions
 nmap \a <plug>(coc-codeaction-cursor)
+nmap \w <plug>(coc-codeaction)
+vmap \w <plug>(coc-codeaction-line)
 vmap \a <plug>(coc-codeaction-selected)
 nmap \f <plug>(coc-fix-current)
 noremap \? <Cmd>CocDiagnostics<CR>
@@ -199,6 +201,7 @@ let g:rainbow_conf = #{
             \     separately: #{
             \         c: #{ inherit: '', parentheses: [ "start=/{/ end=/}/ fold" ] },
             \         cpp: #{ inherit: 'c', parentheses: [] },
+            \         sml: #{ parentheses: [ "start=/(*\@!/ end=/)/", "start=/\\[/ end=/]/", ] },
             \         typescript: #{ parentheses: [] },
             \     }
             \ }

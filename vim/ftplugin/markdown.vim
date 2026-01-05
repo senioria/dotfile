@@ -16,7 +16,9 @@ ftext.CmdEngine.new("Compile", (...args) => {
     if !&ro
         w
     endif
-    exec "AsyncRun pandoc % " .. compile_flags .. args->join(" ")
+    const all_flags = compile_flags .. (type(b:compile_flags) == v:t_string ?
+        b:compile_flags : b:compile_flags->join(" "))
+    exec $"AsyncRun pandoc % {all_flags} {args->join(" ")}"
 }).Do()
 ftext.CmdEngine.new("Run", (...args) => {
     exec "!" .. (has("win32") ? "start" : "xdg-open") .. " %:h/%:t:r.html " .. args->join(" ")

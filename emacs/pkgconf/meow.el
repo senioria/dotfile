@@ -103,6 +103,8 @@
                ("1" delete-other-windows)
                ("2" split-window-below)
                ("3" split-window-right)
+               ("d" switch-window-then-delete)
+               ("t" previous-window)
                ("o" switch-window)
                ("c" tab-bar-new-tab)
                ("w" tab-bar-close-tab)

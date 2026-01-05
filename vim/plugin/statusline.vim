@@ -70,7 +70,7 @@ conf.dispatch = DispatchWin
 # }}} End listeners and dispatcher
 
 # {{{ Wordcount
-const wordcounted_filetypes = ["markdown", "mail", "text"]
+const wordcounted_filetypes = ["markdown", "mail", "text", "typst"]
 var loaded_wordcount = false
 if has("perl")
     cached_val.wordcount = () => $" {perleval("WordCount")} "

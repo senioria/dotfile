@@ -269,7 +269,7 @@ if not argv.nospawn then
 end
 -- Enable media control
 media_control.init()
-autobt.init()
+--autobt.init()
 -- }}}
 
 -- vim: fdm=marker

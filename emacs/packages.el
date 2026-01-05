@@ -7,8 +7,8 @@
 (package-initialize)
 (setf package-selected-packages
       (append package-selected-packages
-              '(powerline neotree use-package markdown-mode solarized-theme meow switch-window
-                          org-fragtog vertico orderless corfu cape marginalia slime smartparens rime slime-company
+              '(powerline treemacs use-package markdown-mode solarized-theme meow switch-window
+                          org-fragtog vertico orderless corfu cape marginalia slime smartparens rime
                           lsp-mode)))
 
 ;; Check for uninstalled packages and install them
@@ -27,13 +27,9 @@
          ("\\.markdown\\'" . markdown-mode))
   :config (load-file (concat dotdir "pkgconf/markdown.el")))
 
-(use-package racket-mode
-  :defer t
-  :mode (("\\.rkt\\'" . racket-mode))
-  :config (lambda ()
-            (load-file (concat dotdir "pkgconf/racket.el"))
-            (add-hook racket-mode-hook (lambda ()
-                                         (setq eldoc-documentation-function #'racket-xp-eldoc-function)))))
+(use-package tuareg
+  :ensure t
+  :mode (("\\.ocamlinit\\'" . tuareg-mode)))
 
 (use-package rime
   :defer t
@@ -42,6 +38,12 @@
   (add-hook 'markdown-mode-hook (lambda () (setq-local seni-meow-last-imstate "rime")))
   (add-hook 'telega-chat-mode-hook
             (lambda () (setq-local seni-meow-last-imstate "rime"))))
+
+(use-package treemacs
+  :defer t
+  :config (load-file (concat dotdir "pkgconf/treemacs.el")))
+(use-package lsp-treemacs
+  :defer t)
 
 (use-package vertico
   :init (vertico-mode))
@@ -74,7 +76,22 @@
     (setf (alist-get 'style (alist-get 'lsp-capf completion-category-defaults))
           '(orderless-flex partial-completion)))
   :hook
-  (lsp-completion-mode . seni-lsp-setup-completion))
+  (lsp-completion-mode . seni-lsp-setup-completion)
+  :config
+  ;(define-key lsp-mode-map (kbd "C-c C-l") lsp-command-map)
+  (load-file (concat dotdir "pkgconf/lsp.el")))
+
+(use-package flycheck
+  :defer t
+  :config
+  (add-to-list 'display-buffer-alist
+             `(,(rx bos "*Flycheck errors*" eos)
+              (display-buffer-reuse-window
+               display-buffer-in-side-window)
+              (side            . bottom)
+              (reusable-frames . visible)
+              (window-height   . 0.20))))
+
 (use-package telega
   :defer t
   :config

@@ -269,7 +269,7 @@ awful.rules.rules = {
     },
     -- Terminal
     {
-        rule_any = { class = { "XTerm", "kitty" } },
+        rule_any = { class = { "kitty" } },
         callback = function(c)
             c:connect_signal("focus", function() c.opacity = 0.9 end)
             c:connect_signal("unfocus", function() c.opacity = 0.7 end)
