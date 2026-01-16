@@ -104,13 +104,8 @@ nnoremap <silent><leader>cr <Cmd>Run<CR>
 xnoremap <silent><Tab> :call UltiSnips#SaveLastVisualSelection()<CR>gvs
 snoremap <silent><expr><Tab> <Esc>:call UltiSnips#ExpandSnippet()<CR>
 " Autoselect suggest in completion & expand snippets
-inoremap <silent><expr><Tab>
-            \ UltiSnips#CanExpandSnippet() ? "<C-R>=UltiSnips#ExpandSnippet()<CR>" :
-            \ pumvisible() ? "<C-N>" :
-            \ UltiSnips#CanJumpForwards() ? "<C-R>=UltiSnips#JumpForwards()<CR>" : "<Tab>"
-inoremap <silent><expr><S-Tab>
-            \ pumvisible() ? "<C-P>" :
-            \ UltiSnips#CanJumpBackwards() ? "<C-R>=UltiSnips#JumpBackwards()<CR>" : "<Tab>"
+inoremap <silent><expr><Tab> pumvisible() ? "<C-N>" : "<Tab>"
+inoremap <silent><expr><S-Tab> pumvisible() ? "<C-P>" : "<Tab>"
 " Confirm completion
 inoremap <silent><expr><CR> pumvisible() ? "<C-Y>" : "<CR>"
 autocmd User BeforeCocNvimInit {

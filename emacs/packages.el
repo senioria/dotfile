@@ -9,7 +9,7 @@
       (append package-selected-packages
               '(powerline treemacs use-package markdown-mode solarized-theme meow switch-window
                           org-fragtog vertico orderless corfu cape marginalia slime smartparens rime
-                          lsp-mode)))
+                          lsp-mode lsp-treemacs rust-mode)))
 
 ;; Check for uninstalled packages and install them
 (let ((package-install-list (seq-remove #'package-installed-p package-selected-packages)))
@@ -27,9 +27,9 @@
          ("\\.markdown\\'" . markdown-mode))
   :config (load-file (concat dotdir "pkgconf/markdown.el")))
 
-(use-package tuareg
+(use-package rust-mode
   :ensure t
-  :mode (("\\.ocamlinit\\'" . tuareg-mode)))
+  :mode (("\\.rs\\'" . rust-mode)))
 
 (use-package rime
   :defer t
@@ -45,6 +45,10 @@
 (use-package lsp-treemacs
   :defer t)
 
+(use-package magit
+  :ensure t
+  :defer t)
+
 (use-package vertico
   :init (vertico-mode))
 (use-package marginalia
@@ -53,10 +57,11 @@
 (use-package savehist
   :init (savehist-mode))
 (use-package corfu
+  :ensure t
   :init
   (setq tab-always-indent 'complete)
   (global-corfu-mode)
-  (global-company-mode -1)
+  (when (fboundp 'global-company-mode) (global-company-mode -1))
   :custom (corfu-auto t)
   (corfu-cycle t)
   (corfu-preselect 'first)
@@ -73,8 +78,8 @@
   (lsp-completion-provider :none)
   :init
   (defun seni-lsp-setup-completion ()
-    (setf (alist-get 'style (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless-flex partial-completion)))
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless partial-completion)))
   :hook
   (lsp-completion-mode . seni-lsp-setup-completion)
   :config

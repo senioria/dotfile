@@ -43,8 +43,6 @@ let g:packager_config = #{
             \         #{ name: '91khr/rainbow', location: 'start' },
             "\        Show the marks
             \         #{ name: 'kshenoy/vim-signature', location: 'start' },
-            "\        Copilot
-            \         'github/copilot.vim',
             \
             "\        File explorer
             \         'preservim/nerdtree',
@@ -53,24 +51,9 @@ let g:packager_config = #{
             "\        Git support
             \         'tpope/vim-fugitive',
             \
-            "\        Language server
-            \         #{ name: 'neoclide/coc.nvim', branch: 'release' },
-            "\        Debug adapter
-            \         #{ name: 'puremourning/vimspector' },
-            "\        Snippets
-            \         #{ name: 'SirVer/ultisnips', location: 'start' },
-            \
             "\         Markdown
             \          'godlygeek/tabular',
             \          'plasticboy/vim-markdown',
-            "\         Latex
-            "\          'lervag/vimtex',
-            \          '91khr/vim-latex-live-preview',
-            "\          Idris2
-            \          #{ name: 'edwinb/idris2-vim', location: 'start' },
-            \
-            "\         Zen mode :)
-            "\          'junegunn/goyo.vim',
             \     ]
             \ }
 
@@ -78,7 +61,6 @@ let g:packager_config = #{
 if has("win32")
 else
     let g:packager_config.packs += [
-                "\     #{ name: 'vim-scripts/fcitx.vim', location: 'start' }
                 \     #{ name: 'lilydjwg/fcitx.vim', location: 'start' }
                 \ ]
 endif

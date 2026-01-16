@@ -13,6 +13,7 @@
  '(lsp-semantic-tokens-allow-delta-requests nil)
  '(lsp-semantic-tokens-enable t)
  '(lsp-semantic-tokens-honor-refresh-requests t)
+ '(lsp-treemacs-error-list-expand-depth 10)
  '(make-backup-files nil)
  '(markdown-enable-highlighting-syntax t)
  '(markdown-enable-math t)
@@ -25,6 +26,9 @@
    '(cape company corfu ein ement f flycheck fsharp-mode jupyter lsp-mode lsp-treemacs magit-section marginalia
           markdown-mode meow orderless powerline rime slime slime-company smartparens solarized-theme switch-window
           telega treemacs tuareg use-package vertico))
+ '(package-selected-packages
+   '(cape corfu fsharp-mode lsp-mode lsp-treemacs magit marginalia meow orderless org-fragtog powerline rime rust-mode
+          slime smartparens solarized-theme switch-window treemacs tuareg vertico))
  '(smtpmail-smtp-server "localhost")
  '(smtpmail-smtp-service 1025)
  '(telega-server-libs-prefix "/usr")
