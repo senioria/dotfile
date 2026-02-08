@@ -83,7 +83,6 @@
   :hook
   (lsp-completion-mode . seni-lsp-setup-completion)
   :config
-  ;(define-key lsp-mode-map (kbd "C-c C-l") lsp-command-map)
   (load-file (concat dotdir "pkgconf/lsp.el")))
 
 (use-package flycheck

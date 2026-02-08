@@ -1,4 +1,26 @@
-(defun seni-lsp-hook-auto-enable (&optional lsp-arg)
-  (add-hook (intern (format "%s-hook" major-mode)) #'lsp))
-(advice-add 'lsp :before #'seni-lsp-hook-auto-enable)
-(seni-lsp-hook-auto-enable)  ;; Enable for current major mode
+(defvar seni/lsp/project-list '())
+(defmacro seni/lsp/with-current-project (name &rest body)
+  (declare (indent 1) (debug (symbolp body)))
+  `(when-let* ((pr (project-current))
+               (,name (project-root pr)))
+     ,@body))
+(defun seni/lsp/autostart ()
+  (seni/lsp/with-current-project pr
+    (when (member pr seni/lsp/project-list)
+      (lsp))))
+
+(defun seni/lsp/hook-enable-project (&optional lsp-arg)
+  (add-hook (intern (format "%s-hook" major-mode)) #'seni-lsp-autostart)
+  (seni/lsp/with-current-project pr
+    (add-to-list seni/lsp/project-list pr)))
+(defun seni/lsp/hook-shutdown (&optional lsp-arg)
+  (seni/lsp/with-current-project pr
+    (setq seni/lsp/project-list (delete seni/lsp/project-list pr))))
+
+(advice-add 'lsp :before #'seni/lsp/hook-enable-project)
+(advice-add 'lsp-workspace-shutdown :before #'seni/lsp/hook-shutdown)
+
+(defun seni/lsp/python-mode-hook () (require 'lsp-pyright))
+(add-hook 'python-mode-hook #'seni/lsp/python-mode-hook)
+
+(seni/lsp/hook-enable-project)  ;; Enable for current major mode
