@@ -1,14 +1,20 @@
 ;; Default setup
 (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-(defun seni-meow-insert-exit ()
+(defun seni/meow/insert-exit ()
   (interactive)
   (if smartparens-mode (meow-paren-mode) (meow-insert-exit)))
+(defun seni/meow/quick-kmacro ()
+  (interactive)
+  (if defining-kbd-macro
+      (meow-end-or-call-kmacro)
+    (meow-beacon-start)))
+
 (meow-define-keys 'insert
-  '("C-[" . seni-meow-insert-exit)
-  '("<escape>" . seni-meow-insert-exit)
-  '("ESC" . seni-meow-insert-exit)
+  '("C-[" . seni/meow/insert-exit)
+  '("<escape>" . seni/meow/insert-exit)
+  '("ESC" . seni/meow/insert-exit)
   '("RET" . newline-and-indent))
-(meow-motion-overwrite-define-key
+(meow-motion-define-key
  '("j" . meow-next)
  '("k" . meow-prev))
 (meow-leader-define-key
@@ -58,7 +64,7 @@
  '("g" . meow-cancel-selection)
  '("G" . meow-grab)
  '("h" . meow-left)
- '("H" . meow-left-expand)
+ '("H" . meow-page-down)
  '("i" . meow-insert)
  '("I" . meow-open-above)
  '("j" . meow-next)
@@ -66,14 +72,13 @@
  '("k" . meow-prev)
  '("K" . meow-prev-expand)
  '("l" . meow-right)
- '("L" . meow-right-expand)
+ '("L" . meow-page-up)
  '("m" . meow-join)
  '("n" . meow-search)
- '("o" . meow-block)
+ '("o" . meow-tree-sitter-node)
  '("O" . meow-to-block)
  '("p" . meow-yank)
- '("q" . meow-quit)
- '("Q" . meow-goto-line)
+ '("Q" . seni/meow/quick-kmacro)
  '("r" . meow-replace)
  '("R" . meow-swap-grab)
  '("s" . meow-kill)
@@ -88,33 +93,18 @@
  '("y" . meow-save)
  '("Y" . meow-sync-grab)
  '("z" . meow-pop-selection)
- '("=" . seni-meow-indent)
+ '("=" . seni/meow/indent)
+ '("_" . universal-argument)
  '("'" . repeat)
  '("<escape>" . keyboard-quit))
-(meow-leader-define-key
- '("C-w" . 'window-switching-map))
 
 ;; Window and tab switching
 (define-prefix-command 'window-and-tab-bar-map)
 (global-set-key (kbd "C-t") 'window-and-tab-bar-map)
-(add-to-list 'meow-keypad-start-keys '(?t . ?t))
-(dolist (key '(
-               ("0" delete-window)
-               ("1" delete-other-windows)
-               ("2" split-window-below)
-               ("3" split-window-right)
-               ("d" switch-window-then-delete)
-               ("t" previous-window)
-               ("o" switch-window)
-               ("c" tab-bar-new-tab)
-               ("w" tab-bar-close-tab)
-               ("n" tab-bar-switch-to-next-tab)
-               ("p" tab-bar-switch-to-prev-tab)
-               ("b" switch-to-buffer)))
-  (define-key window-and-tab-bar-map (kbd (car key)) (cadr key)))
+(add-to-list 'meow-keypad-start-keys '(?t . ?t))ap (kbd (car key)) (cadr key)))
 
 ;; Indent
-(defun seni-meow-indent (&optional start end) (interactive)
+(defun seni/meow/indent (&optional start end) (interactive)
        (letrec ((sel (if (region-active-p)
                          `(,(point-marker) ,(mark-marker))
                        `(,(point-at-bol) ,(point-at-eol))))
@@ -123,36 +113,47 @@
          (indent-region start end)))
 
 ;; Input method
-;; @seni-meow-last-imstate: Current input method state in insert mode
-;; @seni-meow-last-sysimstate: Current system input method state in insert mode
-(setq-default seni-meow-last-imstate nil)
-(setq-default seni-meow-last-sysimstate nil)
-(defun seni-meow-record-im ()
+;; @seni/meow/last-imstate: Whether emacs IM enabled in insert mode
+;; @seni/meow/last-sys-imstate: Fcitx5 state (0/1 for inactivative, 2 for activative)
+(setq-default seni/meow/last-imstate nil)
+(setq-default seni/meow/last-sys-imstate nil)
+
+(defmacro seni/meow/fcitx5-controller (fun &optional var &rest body)
+  (declare (indent 2) (debug (symbolp body)))
+  (require 'dbus)
+  (let ((cb (cond
+             (body `(lambda (,var) ,@body))
+             (var var)
+             (t `nil))))
+    `(dbus-call-method-asynchronously
+      :session "org.fcitx.Fcitx5" "/controller" "org.fcitx.Fcitx.Controller1" ,fun ,cb)))
+
+(defun seni/meow/record-im ()
   (delete-trailing-whitespace (pos-bol) (pos-eol))
-  (setq-local seni-meow-last-sysimstate
-              (string-to-number (string-trim (shell-command-to-string "fcitx5-remote"))))
-  (when (= seni-meow-last-sysimstate 2)
-    (call-process "fcitx5-remote" nil nil nil "-c"))
+  (seni/meow/fcitx5-controller "State" im
+    (setq-local seni/meow/last-sys-imstate im)
+    (when (= im 2) (seni/meow/fcitx5-controller "Deactivate")))
   (if current-input-method
       (progn
-        (setq-local seni-meow-last-imstate current-input-method)
+        (setq-local seni/meow/last-imstate current-input-method)
         (set-input-method nil))
-    (setq-local seni-meow-last-imstate nil)))
-(add-hook 'meow-insert-exit-hook #'seni-meow-record-im)
-(defun seni-meow-recover-im ()
-  (when (and (boundp 'seni-meow-last-sysimstate) (equal seni-meow-last-sysimstate 2))
-    (call-process "fcitx5-remote" nil nil nil "-o"))
-  (when (bound-and-true-p seni-meow-last-imstate)
-    (set-input-method seni-meow-last-imstate)))
-(add-hook 'meow-insert-enter-hook #'seni-meow-recover-im)
+    (setq-local seni/meow/last-imstate nil)))
+(add-hook 'meow-insert-exit-hook #'seni/meow/record-im)
+
+(defun seni/meow/recover-im ()
+  (when (and (boundp 'seni/meow/last-sys-imstate) (= seni/meow/last-sys-imstate 2))
+    (seni/meow/fcitx5-controller "Activate"))
+  (when (bound-and-true-p seni/meow/last-imstate)
+    (set-input-method seni/meow/last-imstate)))
+(add-hook 'meow-insert-enter-hook #'seni/meow/recover-im)
 
 ;; Config for specified modes
-(defun seni-meow-major-dispatch ()
+(defun seni/meow/major-dispatch ()
   (pcase major-mode
     ('debugger-mode (meow-mode -1))
     ('sldb-mode (meow-insert-mode)))
   (when (bound-and-true-p smartparens-mode) (meow-paren-mode)))
-(add-hook 'meow-mode-hook #'seni-meow-major-dispatch)
+(add-hook 'meow-mode-hook #'seni/meow/major-dispatch)
 
 ;; Enable
 (meow-global-mode 1)

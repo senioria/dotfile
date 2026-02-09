@@ -26,6 +26,6 @@
   (sp-local-pair "{" "}" :unless '(sp-in-string-p sp-in-comment-p))
   (sp-local-pair "(" ")" :unless '(sp-in-string-p sp-in-comment-p)))
 
-(add-hook 'smartparens-mode-hook
-          (lambda () (meow-paren-mode) (smartparens-strict-mode)))
+(defun seni/sp/start-hook () (meow-paren-mode) (smartparens-strict-mode))
+(add-hook 'smartparens-mode-hook #'seni/sp/start-hook)
 
