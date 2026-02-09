@@ -101,7 +101,21 @@
 ;; Window and tab switching
 (define-prefix-command 'window-and-tab-bar-map)
 (global-set-key (kbd "C-t") 'window-and-tab-bar-map)
-(add-to-list 'meow-keypad-start-keys '(?t . ?t))ap (kbd (car key)) (cadr key)))
+(add-to-list 'meow-keypad-start-keys '(?t . ?t))
+(dolist (key '(
+               ("0" delete-window)
+               ("1" delete-other-windows)
+               ("2" split-window-below)
+               ("3" split-window-right)
+               ("d" switch-window-then-delete)
+               ("t" previous-window)
+               ("o" switch-window)
+               ("c" tab-bar-new-tab)
+               ("w" tab-bar-close-tab)
+               ("n" tab-bar-switch-to-next-tab)
+               ("p" tab-bar-switch-to-prev-tab)
+               ("b" switch-to-buffer)))
+  (define-key window-and-tab-bar-map (kbd (car key)) (cadr key)))
 
 ;; Indent
 (defun seni/meow/indent (&optional start end) (interactive)
