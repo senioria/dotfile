@@ -1,5 +1,5 @@
 ;; Colorscheme
-(load-theme 'solarized-light t)
+(load-theme 'everforest-hard-light t)
 ;; GUI components
 (tool-bar-mode 0)
 (menu-bar-mode 0)

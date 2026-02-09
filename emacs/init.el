@@ -17,6 +17,7 @@
 (setq-default fill-column 120)
 (setq-default auto-fill-function 'do-auto-fill)
 (global-display-fill-column-indicator-mode t)
+(global-set-key (kbd "s-SPC") 'ignore)
 
 (use-package powerline)
 (powerline-default-theme)

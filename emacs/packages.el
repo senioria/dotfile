@@ -6,10 +6,9 @@
         ("melpa-orig" . "https://melpa.org/packages/")))
 (package-initialize)
 (setf package-selected-packages
-      (append package-selected-packages
-              '(powerline treemacs use-package markdown-mode solarized-theme meow switch-window
-                          org-fragtog vertico orderless corfu cape marginalia slime smartparens rime
-                          lsp-mode lsp-treemacs rust-mode)))
+      (cl-union
+       package-selected-packages
+       `(powerline treemacs use-package markdown-mode meow switch-window org-fragtog vertico orderless corfu cape marginalia slime smartparens rime lsp-mode lsp-treemacs rust-mode yaml-mode)))
 
 ;; Check for uninstalled packages and install them
 (let ((package-install-list (seq-remove #'package-installed-p package-selected-packages)))
@@ -20,16 +19,26 @@
 (require 'use-package)
 
 ;; Individual package config
+(use-package everforest-theme
+  :vc (:url "https://github.com/theorytoe/everforest-emacs.git" :rev :newest))
+
 (use-package markdown-mode
-  :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :config (load-file (concat dotdir "pkgconf/markdown.el")))
 
 (use-package rust-mode
-  :ensure t
   :mode (("\\.rs\\'" . rust-mode)))
+
+(use-package yaml-mode
+  :mode (("\\.ya?ml\\'" . yaml-mode)))
+
+(use-package treesit-auto
+  :custom (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 (use-package rime
   :defer t
@@ -46,7 +55,6 @@
   :defer t)
 
 (use-package magit
-  :ensure t
   :defer t)
 
 (use-package vertico
@@ -121,6 +129,8 @@
 
 (use-package meow
   :config (load-file (concat dotdir "pkgconf/meow.el")))
+(use-package meow-tree-sitter
+  :init (meow-tree-sitter-register-defaults))
 
 (use-package slime-company
   :after (slime corfu)

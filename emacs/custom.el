@@ -6,7 +6,6 @@
  ;; If there is more than one, they won't work right.
  '(ein:jupyter-server-use-subcommand "server")
  '(ein:output-area-inlined-images t)
- '(evil-undo-system 'undo-redo)
  '(inhibit-startup-screen t)
  '(lsp-fsharp-use-dotnet-tool-for-fsac nil)
  '(lsp-keymap-prefix "C-c C-l")
@@ -27,8 +26,11 @@
           markdown-mode meow orderless powerline rime slime slime-company smartparens solarized-theme switch-window
           telega treemacs tuareg use-package vertico))
  '(package-selected-packages
-   '(cape corfu fsharp-mode lsp-mode lsp-treemacs magit marginalia meow orderless org-fragtog powerline rime rust-mode
-          slime smartparens solarized-theme switch-window treemacs tuareg vertico))
+   '(agent-shell cape corfu everforest-theme fsharp-mode lsp-mode lsp-pyright lsp-treemacs magit marginalia meow
+                 meow-tree-sitter orderless org-fragtog powerline rime rust-mode slime smartparens switch-window
+                 treemacs treesit-auto tuareg vertico yaml-mode))
+ '(package-vc-selected-packages
+   '((everforest-theme :url "https://github.com/theorytoe/everforest-emacs.git")))
  '(smtpmail-smtp-server "localhost")
  '(smtpmail-smtp-service 1025)
  '(telega-server-libs-prefix "/usr")
