@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 ;; Set the custom file
 (setq custom-file "~/.emacs.d/custom.el")
 (load-file custom-file)

@@ -21,7 +21,14 @@
 (advice-add 'lsp :before #'seni/lsp/hook-enable-project)
 (advice-add 'lsp-workspace-shutdown :before #'seni/lsp/hook-shutdown)
 
+;; flymake override
+(defun seni/lsp/flymake-override ()
+  (setq-local flymake-diagnostic-functions '(lsp-diagnostics--flymake-backend)))
+(add-hook 'lsp-managed-mode-hook #'seni/lsp/flymake-override)
+
+;; Per language setting
 (defun seni/lsp/python-mode-hook () (require 'lsp-pyright))
 (add-hook 'python-mode-hook #'seni/lsp/python-mode-hook)
 
-(seni/lsp/hook-enable-project)  ;; Enable for current major mode
+;; Enable for current major mode
+(seni/lsp/hook-enable-project)

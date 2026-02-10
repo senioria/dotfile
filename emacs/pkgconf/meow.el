@@ -1,13 +1,6 @@
+;;; -*- lexical-binding: t; -*-
 ;; Default setup
 (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-(defun seni/meow/insert-exit ()
-  (interactive)
-  (if smartparens-mode (meow-paren-mode) (meow-insert-exit)))
-(defun seni/meow/quick-kmacro ()
-  (interactive)
-  (if defining-kbd-macro
-      (meow-end-or-call-kmacro)
-    (meow-beacon-start)))
 
 (meow-define-keys 'insert
   '("C-[" . seni/meow/insert-exit)
@@ -49,8 +42,10 @@
  '(";" . meow-reverse)
  '("," . meow-inner-of-thing)
  '("." . meow-bounds-of-thing)
- '("[" . meow-beginning-of-thing)
- '("]" . meow-end-of-thing)
+ '("<" . meow-beginning-of-thing)
+ '(">" . meow-end-of-thing)
+ '("[" . seni/meow/ts-node-prev)
+ '("]" . seni/meow/ts-node-next)
  '("a" . meow-append)
  '("A" . meow-open-below)
  '("b" . meow-back-word)
@@ -78,6 +73,7 @@
  '("o" . meow-tree-sitter-node)
  '("O" . meow-to-block)
  '("p" . meow-yank)
+ '("q" . imenu)
  '("Q" . seni/meow/quick-kmacro)
  '("r" . meow-replace)
  '("R" . meow-swap-grab)
@@ -94,9 +90,72 @@
  '("Y" . meow-sync-grab)
  '("z" . meow-pop-selection)
  '("=" . seni/meow/indent)
- '("_" . universal-argument)
- '("'" . repeat)
  '("<escape>" . keyboard-quit))
+
+;; Action helper functions
+(defun seni/meow/insert-exit ()
+  (interactive)
+  (if smartparens-mode (meow-paren-mode) (meow-insert-exit)))
+
+(defun seni/meow/quick-kmacro ()
+  (interactive)
+  (if defining-kbd-macro
+      (meow-end-or-call-kmacro)
+    (meow-beacon-start)))
+
+(defun seni/meow/ts-node-step/raw (n)
+  (when-let*
+      ((orig (point))
+       (node (treesit-node-at orig))
+       (node
+        (named-let step ((cur node) (prev node))
+          (if (or
+               (null cur)
+               (< (treesit-node-start cur) orig)
+               (equal cur (treesit-buffer-root-node)))
+              prev
+            (step (treesit-node-parent cur) cur))))
+       (next-func (if (> n 0) #'treesit-node-next-sibling #'treesit-node-prev-sibling))
+       (next
+        (cl-loop
+         for cur = node then
+         (named-let step ((node cur)
+                          (next (funcall next-func node)))
+           (if next next
+             (when-let ((par (treesit-node-parent node)))
+               (step par (funcall next-func par)))))
+         repeat (abs n)
+         finally return cur))
+       (p (treesit-node-start next)))
+    p))
+
+(defun seni/meow/ts-node-next-1 ()
+  (when-let ((p (seni/meow/ts-node-step/raw 1)))
+    (goto-char p)))
+(defun seni/meow/ts-node-prev-1 ()
+  (when-let ((p (seni/meow/ts-node-step/raw -1)))
+    (goto-char p)))
+
+(defun seni/meow/ts-node-next (n)
+  (interactive "p")
+  (when-let
+      ((orig (point))
+       (p (seni/meow/ts-node-step/raw n)))
+    (thread-first
+     (meow--make-selection '(expand . symbol) orig p nil)
+     (meow--select t))
+    (meow--maybe-highlight-num-positions '(seni/meow/ts-node-prev-1 . seni/meow/ts-node-next-1))))
+(defun seni/meow/ts-node-prev (n)
+  (interactive "p")
+  (seni/meow/ts-node-next (- n)))
+
+(defun seni/meow/indent (&optional start end) (interactive)
+       (letrec ((sel (if (region-active-p)
+                         `(,(point-marker) ,(mark-marker))
+                       `(,(point-at-bol) ,(point-at-eol))))
+                (start (or start (min (car sel) (cadr sel))))
+                (end (or end (max (car sel) (cadr sel)))))
+         (indent-region start end)))
 
 ;; Window and tab switching
 (define-prefix-command 'window-and-tab-bar-map)
@@ -116,15 +175,6 @@
                ("p" tab-bar-switch-to-prev-tab)
                ("b" switch-to-buffer)))
   (define-key window-and-tab-bar-map (kbd (car key)) (cadr key)))
-
-;; Indent
-(defun seni/meow/indent (&optional start end) (interactive)
-       (letrec ((sel (if (region-active-p)
-                         `(,(point-marker) ,(mark-marker))
-                       `(,(point-at-bol) ,(point-at-eol))))
-                (start (or start (min (car sel) (cadr sel))))
-                (end (or end (max (car sel) (cadr sel)))))
-         (indent-region start end)))
 
 ;; Input method
 ;; @seni/meow/last-imstate: Whether emacs IM enabled in insert mode
@@ -146,7 +196,7 @@
   (delete-trailing-whitespace (pos-bol) (pos-eol))
   (seni/meow/fcitx5-controller "State" im
     (setq-local seni/meow/last-sys-imstate im)
-    (when (= im 2) (seni/meow/fcitx5-controller "Deactivate")))
+    (when (eq im 2) (seni/meow/fcitx5-controller "Deactivate")))
   (if current-input-method
       (progn
         (setq-local seni/meow/last-imstate current-input-method)
@@ -155,7 +205,7 @@
 (add-hook 'meow-insert-exit-hook #'seni/meow/record-im)
 
 (defun seni/meow/recover-im ()
-  (when (and (boundp 'seni/meow/last-sys-imstate) (= seni/meow/last-sys-imstate 2))
+  (when (and (boundp 'seni/meow/last-sys-imstate) (eq seni/meow/last-sys-imstate 2))
     (seni/meow/fcitx5-controller "Activate"))
   (when (bound-and-true-p seni/meow/last-imstate)
     (set-input-method seni/meow/last-imstate)))
@@ -164,7 +214,7 @@
 ;; Config for specified modes
 (defun seni/meow/major-dispatch ()
   (pcase major-mode
-    ('debugger-mode (meow-mode -1))
+    ('debugger-mode (when (bound-and-true-p meow-mode) (meow-mode -1)))
     ('sldb-mode (meow-insert-mode)))
   (when (bound-and-true-p smartparens-mode) (meow-paren-mode)))
 (add-hook 'meow-mode-hook #'seni/meow/major-dispatch)
