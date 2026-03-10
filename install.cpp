@@ -1,11 +1,12 @@
-#if 0
+#if 0 /* keep the file recognizable by treesitter
 dotpath=$(readlink -f $(dirname $0))
 cd $dotpath
 [ ! -z "$DEBUG" ] && \
-        flags='-Wall -Wextra -Weffc++ -Wpedantic -O0 -DDEBUG -ggdb -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -lrt -fno-sanitize-recover -fstack-protector -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -std=c++23 -o .install -DDOTPATH="\"'$dotpath'\"" -DHOMEPATH="\"'$HOME'\"" -lstdc++_libbacktrace' \
+        flags='-Wall -Wextra -Weffc++ -Wpedantic -O0 -DDEBUG -ggdb -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -lrt -fno-sanitize-recover -fstack-protector -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -std=c++23 -o .install -DDOTPATH="\"'$dotpath'\"" -DHOMEPATH="\"'$HOME'\"" -lstdc++exp' \
         || flags='-std=c++23 -o .install -DDOTPATH="\"'$dotpath'\"" -DHOMEPATH="\"'$HOME'\"" -lstdc++exp'
 CXXFLAGS="$flags" make -sf <(echo -e '.install:install.cpp; $(CXX) $< $(CXXFLAGS)') .install || exit $?
 exec ./.install $@
+# */
 #endif
 // {{{ Premable
 #include <cstdio>
@@ -43,6 +44,8 @@ struct {
         false
 #endif
         ;  // Resume the Vim indent ><
+    bool has_x11 = false;
+    bool has_wl = false;
     const char *helpmsg = R"(Usage: %o <options> <configs>
 A dotfile installation helper. If no option is specified, default to -i,
 if no config is specified either, default is -l.
@@ -196,7 +199,7 @@ private:
 public:
     // Explicitly exclude self to make clang happy
     template<class T> requires (!std::same_as<InstallerBox, T>) && ConfigInstaller<T>
-    InstallerBox(T &&inst) : vt(&VTable_v<T>), data(std::aligned_alloc(alignof(T), sizeof(T)))
+    InstallerBox(T inst) : vt(&VTable_v<T>), data(std::aligned_alloc(alignof(T), sizeof(T)))
     {
         new(data) T(std::move(inst));
     }
@@ -249,13 +252,13 @@ public:
 };
 
 template<ConfigInstaller T, ConfigInstaller U>
-auto operator&(T &&a, U &&b)
+auto operator&(T a, U b)
 {
     struct {
         T a; U b;
         void install() { a.install(); b.install(); }
         bool is_installed() const { return a.is_installed() && b.is_installed(); }
-    } res{a, b};
+    } res{std::move(a), std::move(b)};
     return res;
 }
 
@@ -410,6 +413,50 @@ public:
     }
 };
 // }}} End SymlinkConfig
+
+// {{{ X11Config and WlConfig
+#define config_tmpl(cls, conf) \
+    class cls \
+    { \
+    private: \
+        std::vector<InstallerBox> sub; \
+    public: \
+        cls(ConfigInstaller auto ...xs) \
+        { \
+            sub.reserve(sizeof...(xs)); \
+            (sub.emplace_back(std::move(xs)), ...); \
+        } \
+        cls(const cls &) = delete; \
+        cls &operator=(const cls &) = delete; \
+        cls(cls &&o) : sub(std::move(o.sub)) {} \
+        cls &operator=(cls &&o) \
+        { \
+            assert(this != &o && "There shouldn't be self-assigning"); \
+            this->~cls(); \
+            new(this) cls(std::move(o)); \
+            return *this; \
+        } \
+        void install() \
+        { \
+            if (!env.conf) \
+                return; \
+            for (auto &it : sub) \
+                it.install(); \
+        } \
+        bool is_installed() const \
+        { \
+            return env.conf ? \
+                std::all_of(sub.begin(), sub.end(), [] (const auto &it) { \
+                    return it.is_installed(); \
+                }) : \
+                /* Always treat everything as installed when no corresponding env */ \
+                true; \
+        } \
+    }
+config_tmpl(X11Config, has_x11);
+config_tmpl(WlConfig, has_wl);
+#undef config_tmpl
+// }}} End X11Config and WlConfig
 // }}}1 End config helpers
 
 
@@ -438,6 +485,8 @@ int main(int, char **argv)
 #else
         DATAPATH;
 #endif  // DATAPATH
+    env.has_x11 = env.iswin ? false : std::string("x11") == std::getenv("XDG_SESSION_TYPE");
+    env.has_wl = env.iswin ? false : std::string("wayland") == std::getenv("XDG_SESSION_TYPE");
     // }}} End process default parameters
 
     fs::current_path(fs::path(argv[0]).remove_filename());
@@ -574,10 +623,21 @@ int main(int, char **argv)
 
 
 add_conf { "awesome", ConfigInfo::UNIX, "AwesomeWM config",
-    [] { return InvokerConfig { ".config/awesome/rc.lua", "--", "awesome",
-        format(R"(local args = args or {}
+    [] { return X11Config {
+        InvokerConfig { ".config/awesome/rc.lua", "--", "awesome",
+            format(R"(local args = args or {}
 args[1] = "%D"
-loadfile("%D/awesome/rc.lua")(args))") }; },
+loadfile("%D/awesome/rc.lua")(args))") }, }; }
+};
+
+add_conf { "hyprland", ConfigInfo::UNIX, "Hyprland config",
+    [] { return WlConfig {
+        InvokerConfig { ".config/hypr/hyprland.conf", "#", "hyprland", format(
+                R"(source = %D/hypr/hyprland.conf)") },
+        InvokerConfig { ".config/hypr/hypridle.conf", "#", "hypridle", format(
+                R"(source = %D/hypr/hypridle.conf)"
+                ) }, };
+    },
 };
 
 add_conf { "emacs", ConfigInfo::AllOS, "Emacs config",
@@ -613,10 +673,12 @@ add_conf { "pandoc", ConfigInfo::AllOS, "Pandoc assets",
 add_conf { "profile", ConfigInfo::UNIX, "Default user profiles",
     [] {
         return InvokerConfig { ".profile", "#", "profile", format("source %D/profile/profile") } &
-            InvokerConfig { ".xprofile", "#", "profile", format("source %D/profile/xprofile") } &
-            InvokerConfig { ".Xresources", "!", "profile", format(
-                    R"(#include "%D/profile/Xresources")""\n"
-                    R"(#include "%D/profile/Solarizedxterm/.Xdefaults")") } &
+            X11Config {
+                InvokerConfig { ".xprofile", "#", "profile", format("source %D/profile/xprofile") },
+                InvokerConfig { ".Xresources", "!", "profile", format(
+                        R"(#include "%D/profile/Xresources")""\n"
+                        R"(#include "%D/profile/Solarizedxterm/.Xdefaults")") },
+            } &
             InvokerConfig { ".ssh/config", "#", "ssh config", format("Include %D/profile/ssh_config") } &
             InvokerConfig { ".gdbinit", "#", "gdb config", format("source %D/profile/gdbinit") } &
             SymlinkConfig { "profile/rustfmt.toml", ".config/rustfmt/rustfmt.toml" } &
