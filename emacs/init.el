@@ -10,7 +10,7 @@
 (load-file (concat dotdir (if (display-graphic-p) "gui.el" "tui.el")))
 
 ;; Configs
-(global-visual-line-mode)
+(setq-default truncate-lines t)
 (global-display-line-numbers-mode t)
 (show-paren-mode)
 

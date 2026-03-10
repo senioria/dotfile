@@ -6,20 +6,32 @@
   :lighter "[NP]"
   :keymap meow-paren-keymap)
 
-(defun seni-meow-paren-kill ()
+(defun seni/meow/paren/kill ()
   (interactive)
   (if (region-active-p) (meow-kill) (sp-kill-sexp)))
+
+(defun seni/meow/paren/wrap ()
+  (interactive)
+  (when-let*
+      ((pairs
+        (cl-loop
+         for pair in sp-local-pairs
+         for open = (plist-get pair :open)
+         for close = (plist-get pair :close)
+         when (not (null close))
+         collect `(,(format "%s%s" open close) . ,open)))
+       (selected (completing-read "Wrap with pair: " pairs nil t))
+       (selpair (cdr (assoc selected pairs))))
+    (sp-wrap-with-pair selpair)))
 
 (meow-define-keys 'paren
   '("]" . sp-down-sexp)
   '("[" . sp-up-sexp)
-  '("{" . meow-beginning-of-thing)
-  '("}" . meow-end-of-thing)
+  '("}" . seni/meow/paren/wrap)
+  '("{" . sp-unwrap-sexp)
   '("e" . sp-next-sexp)
   '("b" . sp-previous-sexp)
-  '("<" . sp-beginning-of-sexp)
-  '(">" . sp-end-of-sexp)
-  '("s" . seni-meow-paren-kill))
+  '("s" . seni/meow/paren/kill))
 
 (sp-with-modes sp-lisp-modes
   (sp-local-pair "[" "]" :unless '(sp-in-string-p))

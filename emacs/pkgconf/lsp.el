@@ -27,8 +27,19 @@
 (add-hook 'lsp-managed-mode-hook #'seni/lsp/flymake-override)
 
 ;; Per language setting
-(defun seni/lsp/python-mode-hook () (require 'lsp-pyright))
+(defun seni/lsp/pyright-filter (param work)
+  (puthash
+   "diagnostics"
+   (cl-remove-if (lambda (diag) (gethash "tags" diag))
+                 (gethash "diagnostics" param))
+   param)
+  param)
+(defun seni/lsp/python-mode-hook ()
+  (require 'lsp-pyright)
+  (setq lsp-pyright-diagnostic-severity-overrides '(("reportUnusedVariable" . "none")))
+  (setq lsp-diagnostic-filter #'seni/lsp/pyright-filter))
 (add-hook 'python-mode-hook #'seni/lsp/python-mode-hook)
+(add-hook 'python-ts-mode-hook #'seni/lsp/python-mode-hook)
 
 ;; Enable for current major mode
 (seni/lsp/hook-enable-project)

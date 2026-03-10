@@ -6,6 +6,8 @@
  ;; If there is more than one, they won't work right.
  '(ein:jupyter-server-use-subcommand "server")
  '(ein:output-area-inlined-images t)
+ '(imenu-flatten 'prefix)
+ '(indent-bars-treesit-support t)
  '(inhibit-startup-screen t)
  '(lsp-fsharp-use-dotnet-tool-for-fsac nil)
  '(lsp-keymap-prefix "C-c C-l")
@@ -13,6 +15,17 @@
  '(lsp-semantic-tokens-enable t)
  '(lsp-semantic-tokens-honor-refresh-requests t)
  '(lsp-treemacs-error-list-expand-depth 10)
+ '(lsp-ui-doc-alignment 'window)
+ '(lsp-ui-doc-enhanced-markdown nil)
+ '(lsp-ui-doc-max-height 30)
+ '(lsp-ui-doc-max-width 80)
+ '(lsp-ui-doc-position 'bottom)
+ '(lsp-ui-doc-show-with-cursor t)
+ '(lsp-ui-sideline-diagnostic-max-lines 3)
+ '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-hover t)
+ '(lsp-ui-sideline-wait-for-all-symbols nil)
  '(make-backup-files nil)
  '(markdown-enable-highlighting-syntax t)
  '(markdown-enable-math t)
@@ -21,16 +34,13 @@
  '(org-format-latex-options
    '(:foreground default :background default :scale 2.0 :html-foreground "Black" :html-background "Transparent" :html-scale
                  1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
- '(package-packages-selected
-   '(cape company corfu ein ement f flycheck fsharp-mode jupyter lsp-mode lsp-treemacs magit-section marginalia
-          markdown-mode meow orderless powerline rime slime slime-company smartparens solarized-theme switch-window
-          telega treemacs tuareg use-package vertico))
  '(package-selected-packages
-   '(agent-shell cape corfu everforest-theme fsharp-mode lsp-mode lsp-pyright lsp-treemacs magit marginalia meow
-                 meow-tree-sitter orderless org-fragtog powerline rime rust-mode slime smartparens switch-window
-                 treemacs treesit-auto tuareg vertico yaml-mode))
+   '(agent-shell-sidebar cape corfu everforest-theme flycheck fsharp-mode indent-bars lsp-pyright lsp-treemacs lsp-ui magit
+                         marginalia meow-tree-sitter orderless org-fragtog powerline rime rust-mode slime smartparens
+                         switch-window treesit-auto tuareg vertico vundo yaml-mode))
  '(package-vc-selected-packages
-   '((everforest-theme :url "https://github.com/theorytoe/everforest-emacs.git")))
+   '((agent-shell-sidebar :url "https://github.com/cmacrae/agent-shell-sidebar")
+     (everforest-theme :url "https://github.com/theorytoe/everforest-emacs.git")))
  '(smtpmail-smtp-server "localhost")
  '(smtpmail-smtp-service 1025)
  '(telega-server-libs-prefix "/usr")

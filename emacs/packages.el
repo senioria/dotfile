@@ -34,6 +34,13 @@
 (use-package yaml-mode
   :mode (("\\.ya?ml\\'" . yaml-mode)))
 
+(use-package indent-bars
+  :defer t
+  :hook
+  (((python-mode python-ts-mode) . #'indent-bars-mode))
+  :config
+  (set-face-extend 'line-number t))
+
 (use-package treesit-auto
   :custom (treesit-auto-install 'prompt)
   :config
@@ -55,7 +62,9 @@
   :defer t)
 
 (use-package magit
-  :defer t)
+  :defer t
+  :config
+  (transient-suffix-put 'magit-dispatch "k" :key "\\"))
 
 (use-package vertico
   :init (vertico-mode))
@@ -93,8 +102,15 @@
   :config
   (load-file (concat dotdir "pkgconf/lsp.el")))
 
+(use-package lsp-ui
+  :defer t
+  :after lsp-mode
+  :custom-face
+  (lsp-ui-doc-background ((t (:background nil :inherit hl-line)))))
+
 (use-package flycheck
   :defer t
+  :ensure nil
   :config
   (add-to-list 'display-buffer-alist
              `(,(rx bos "*Flycheck errors*" eos)
@@ -132,7 +148,19 @@
 (use-package meow-tree-sitter
   :init (meow-tree-sitter-register-defaults))
 
+(use-package avy
+  :defer t
+  :config
+  (avy-setup-default))
+
+(use-package vundo
+  :defer t
+  :config
+  (setq vundo-glyph-alist vundo-unicode-symbols))
+
 (use-package slime-company
+  :defer t
+  :ensure nil
   :after (slime corfu)
   :config
   (setq slime-company-completion 'fuzzy
