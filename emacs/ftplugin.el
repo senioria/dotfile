@@ -10,3 +10,9 @@
         (ignore-error setting-constant
           (set var val))))))
 
+(defun seni/ft/doc-modes-hook ()
+  (visual-line-mode)
+  (setq auto-fill-function nil))
+(add-hook 'org-mode-hook #'seni/ft/doc-modes-hook)
+(add-hook 'markdown-mode-hook #'seni/ft/doc-modes-hook)
+

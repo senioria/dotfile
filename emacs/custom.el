@@ -11,7 +11,6 @@
  '(inhibit-startup-screen t)
  '(lsp-fsharp-use-dotnet-tool-for-fsac nil)
  '(lsp-keymap-prefix "C-c C-l")
- '(lsp-semantic-tokens-allow-delta-requests nil)
  '(lsp-semantic-tokens-enable t)
  '(lsp-semantic-tokens-honor-refresh-requests t)
  '(lsp-treemacs-error-list-expand-depth 10)
@@ -31,13 +30,15 @@
  '(markdown-enable-math t)
  '(markdown-fontify-code-blocks-natively t)
  '(markdown-header-scaling t)
+ '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-format-latex-options
    '(:foreground default :background default :scale 2.0 :html-foreground "Black" :html-background "Transparent" :html-scale
                  1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
  '(package-selected-packages
-   '(agent-shell-sidebar cape corfu everforest-theme flycheck fsharp-mode indent-bars lsp-pyright lsp-treemacs lsp-ui magit
-                         marginalia meow-tree-sitter orderless org-fragtog powerline rime rust-mode slime smartparens
-                         switch-window treesit-auto tuareg vertico vundo yaml-mode))
+   '(agent-shell-sidebar cape corfu direnv everforest-theme flycheck fsharp-mode indent-bars lsp-pyright lsp-treemacs
+                         lsp-ui magit marginalia meow-tree-sitter orderless org-fragtog ox-gfm powerline rime rust-mode
+                         signa slime smartparens switch-window treesit-auto tuareg vertico visual-fill-column vundo
+                         yaml-mode))
  '(package-vc-selected-packages
    '((agent-shell-sidebar :url "https://github.com/cmacrae/agent-shell-sidebar")
      (everforest-theme :url "https://github.com/theorytoe/everforest-emacs.git")))

@@ -41,10 +41,15 @@
   :config
   (set-face-extend 'line-number t))
 
+(use-package visual-fill-column
+  :defer t
+  :config
+  (add-hook 'visual-line-mode-hook #'visual-fill-column-for-vline))
+
 (use-package treesit-auto
   :custom (treesit-auto-install 'prompt)
   :config
-  ;(treesit-auto-add-to-auto-mode-alist 'all)
+  (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
 (use-package rime
@@ -83,8 +88,7 @@
   (corfu-cycle t)
   (corfu-preselect 'first)
   (corfu-popupinfo-mode t)
-  (corfu-quit-no-match t)
-  :bind (:map corfu-map ("C-[" . #'corfu-quit)))
+  (corfu-quit-no-match t))
 
 (use-package cape
   :config)

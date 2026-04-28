@@ -1,3 +1,3 @@
 ;; Colorscheme
-(load-theme 'solarized-zenburn t)
+;(load-theme 'solarized-zenburn t)
 
