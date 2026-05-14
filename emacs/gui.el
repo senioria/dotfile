@@ -1,4 +1,4 @@
-;; Colorscheme
+;; Colorscheme  -*- lexical-binding: t; -*-
 (load-theme 'everforest-hard-light t)
 ;; GUI components
 (tool-bar-mode 0)

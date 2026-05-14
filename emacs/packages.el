@@ -1,3 +1,4 @@
+;;  -*- lexical-binding: t; -*-
 ;; Init packages
 (require 'package)
 (setq package-archives
@@ -8,7 +9,7 @@
 (setf package-selected-packages
       (cl-union
        package-selected-packages
-       `(powerline treemacs use-package markdown-mode meow switch-window org-fragtog vertico orderless corfu cape marginalia slime smartparens rime lsp-mode lsp-treemacs rust-mode yaml-mode)))
+       `(powerline treemacs use-package markdown-mode switch-window org-fragtog vertico orderless corfu cape marginalia slime smartparens rime lsp-mode lsp-treemacs rust-mode yaml-mode)))
 
 ;; Check for uninstalled packages and install them
 (let ((package-install-list (seq-remove #'package-installed-p package-selected-packages)))
@@ -49,22 +50,26 @@
 (use-package treesit-auto
   :custom (treesit-auto-install 'prompt)
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
+  ;(treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
 (use-package rime
   :defer t
   :hook (markdown-mode org-mode telega-load)
   :config
-  (add-hook 'markdown-mode-hook (lambda () (setq-local seni-meow-last-imstate "rime")))
+  (add-hook 'markdown-mode-hook (lambda () (setq-local seni/signa/last-imstate "rime")))
   (add-hook 'telega-chat-mode-hook
-            (lambda () (setq-local seni-meow-last-imstate "rime"))))
+            (lambda () (setq-local seni/signa/last-imstate "rime"))))
 
 (use-package treemacs
   :defer t
   :config (load-file (concat dotdir "pkgconf/treemacs.el")))
 (use-package lsp-treemacs
   :defer t)
+
+(use-package agent-shell
+  :defer t
+  :config (load-file (concat dotdir "pkgconf/agentsh.el")))
 
 (use-package magit
   :defer t
@@ -82,6 +87,7 @@
   :ensure t
   :init
   (setq tab-always-indent 'complete)
+  (setq text-mode-ispell-word-completion nil)
   (global-corfu-mode)
   (when (fboundp 'global-company-mode) (global-company-mode -1))
   :custom (corfu-auto t)
@@ -141,16 +147,11 @@
   :config
   (setq slime-lisp-implementations '((sbcl ("/usr/bin/sbcl"))))
   (setq inferior-lisp-program "sbcl")
-  (slime-setup '(slime-fancy slime-quicklisp slime-asdf))
-  (dolist (mode '(meow-normal-mode meow-insert-mode meow-paren-mode))
-    (let ((meow-keys (assq mode minor-mode-map-alist)))
-      (assq-delete-all mode minor-mode-map-alist)
-      (add-to-list 'minor-mode-map-alist meow-keys))))
+  (slime-setup '(slime-fancy slime-quicklisp slime-asdf)))
 
-(use-package meow
-  :config (load-file (concat dotdir "pkgconf/meow.el")))
-(use-package meow-tree-sitter
-  :init (meow-tree-sitter-register-defaults))
+(use-package signa
+  :vc (:url "https://codeberg.org/senioria/signa.git")
+  :config (load-file (concat dotdir "pkgconf/signa.el")))
 
 (use-package avy
   :defer t
@@ -180,4 +181,3 @@
   :config (load-file (concat dotdir "pkgconf/smartparens.el")))
 
 (add-hook 'org-mode-hook 'org-fragtog-mode)
-

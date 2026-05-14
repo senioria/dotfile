@@ -1,3 +1,4 @@
+;;  -*- lexical-binding: t; -*-
 ;; The mirror of custom variables
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -14,7 +15,6 @@
  '(lsp-semantic-tokens-enable t)
  '(lsp-semantic-tokens-honor-refresh-requests t)
  '(lsp-treemacs-error-list-expand-depth 10)
- '(lsp-ui-doc-alignment 'window)
  '(lsp-ui-doc-enhanced-markdown nil)
  '(lsp-ui-doc-max-height 30)
  '(lsp-ui-doc-max-width 80)
